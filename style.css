@@ -336,3 +336,11 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 }
 
 #history-footer { background: var(--accent-yellow); font-weight: 900; text-align: center; }
+
+.btn-export:disabled {
+    background-color: #eee;
+    color: #999;
+    border-color: #ddd !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
