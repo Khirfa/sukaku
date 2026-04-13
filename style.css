@@ -263,6 +263,14 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     transition: opacity 0.3s;
 }
 
+.btn-export:disabled {
+    background-color: #eee;
+    color: #999;
+    border-color: #ddd !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 /* History Table */
 .history-card { background: white; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
 #history-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
