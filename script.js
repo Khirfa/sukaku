@@ -30,33 +30,45 @@ function updateItemQuantity(itemId, change) {
     }
     updateDisplay();
 }
-
 function updateDisplay() {
     const cartList = document.getElementById('cart-list');
-    const cartItems = Object.values(cart);
-    totalHarga = cartItems.reduce((acc, item) => acc + (item.harga * item.quantity), 0);
+    const totalSpan = document.getElementById('total-price');
+    const cashInput = document.getElementById('cash-amount');
     
+    if (!cartList) return;
+    cartList.innerHTML = '';
+    totalHarga = 0;
+    
+    const cartItems = Object.values(cart);
+
     if (cartItems.length === 0) {
         cartList.innerHTML = '<p class="empty-cart-msg">Keranjang masih kosong.</p>';
-        document.getElementById('cash-amount').disabled = true;
+        if(cashInput) cashInput.disabled = true;
     } else {
-        document.getElementById('cash-amount').disabled = false;
-        cartList.innerHTML = cartItems.map(item => `
-            <div class="cart-item">
+        if(cashInput) cashInput.disabled = false;
+        cartItems.forEach(item => {
+            const itemTotal = item.harga * item.quantity;
+            totalHarga += itemTotal;
+            
+            const li = document.createElement('div');
+            li.className = 'cart-item';
+            // Sekarang cuma ada 2 bagian utama: info dan actions
+            li.innerHTML = `
                 <div class="cart-item-info">
-                    <div class="cart-item-name">${item.nama}</div>
-                    <small>@${item.harga.toLocaleString()}</small>
+                    <span class="cart-item-name">${item.nama}</span>
+                    <span class="cart-item-price">@ Rp ${item.harga.toLocaleString('id-ID')}</span>
                 </div>
                 <div class="cart-item-actions">
-                    <button class="btn-qty" onclick="event.stopPropagation(); updateItemQuantity('${item.id}', -1)">-</button>
-                    <span>${item.quantity}</span>
-                    <button class="btn-qty btn-plus" onclick="event.stopPropagation(); updateItemQuantity('${item.id}', 1)">+</button>
+                    <button onclick="event.stopPropagation(); updateItemQuantity('${item.id}', -1)" class="btn-qty btn-minus">-</button>
+                    <span class="cart-item-qty">${item.quantity}</span>
+                    <button onclick="event.stopPropagation(); updateItemQuantity('${item.id}', 1)" class="btn-qty btn-plus">+</button>
                 </div>
-                <div class="cart-item-subtotal">Rp ${(item.harga * item.quantity).toLocaleString()}</div>
-            </div>
-        `).join('');
+            `;
+            cartList.appendChild(li);
+        });
     }
-    document.getElementById('total-price').innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
+    
+    if(totalSpan) totalSpan.innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
     hitungKembalian();
 }
 
