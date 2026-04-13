@@ -156,13 +156,12 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     background-color: #ebebeb;
     color: var(--primary-red);
     /* Sedikit penyesuaian visual jika simbol minus terasa terlalu rendah */
-    padding-bottom: 8px; 
+    padding-bottom: 2px; 
 }
 
 .btn-plus {
     background-color: var(--accent-yellow);
     color: var(--primary-red);
-	padding-bottom: 4px;
 }
 
 /* Efek saat ditekan */
