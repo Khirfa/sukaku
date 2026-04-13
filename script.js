@@ -154,12 +154,14 @@ function simpanKeLokal() {
     const cashRaw = document.getElementById('cash-amount').value.replace(/\./g, "");
     const cash = parseFloat(cashRaw) || 0;
 
-    // Validasi tetap ada, tapi tanpa alert (tombol bisa dibuat mati jika tidak valid)
     if (cartItems.length === 0 || cash < totalHarga) return;
+
+    // UBAH BAGIAN INI: Gunakan format Nama (Qty) dengan baris baru
+    const itemString = cartItems.map(i => `${i.nama} (${i.quantity})`).join("<br>");
 
     const transaksiBaru = {
         tanggal: new Date().toLocaleString('id-ID'),
-        item: Object.values(cart).map(i => `${i.nama}(${i.quantity})`).join(", "),
+        item: itemString, // Sekarang berisi tag <br> untuk baris baru
         total: totalHarga,
         metode: metodePembayaran 
     };
@@ -168,16 +170,8 @@ function simpanKeLokal() {
     antrean.push(transaksiBaru);
     localStorage.setItem('antrean_kasir', JSON.stringify(antrean));
 
-    // Alert dihapus, langsung jalankan fungsi bersih-bersih
     resetCart();
     tampilkanRiwayat();
-    
-    // Kembalikan ke metode Tunai
-    const tunaiRadio = document.querySelector('input[value="Tunai"]');
-    if (tunaiRadio) {
-        tunaiRadio.checked = true;
-        togglePaymentMethod('Tunai');
-    }
 }
 
 async function exportKeSheets() {
