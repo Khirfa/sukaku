@@ -75,17 +75,21 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 
 /* Styling Item di Dalam Keranjang agar Full & Rata */
 .cart-item {
-    display: flex;
-    justify-content: space-between; /* Paksa info ke kiri, tombol ke kanan */
+    display: grid;
+    grid-template-columns: 1fr auto auto; /* Nama (lebar) | Tombol | Subtotal */
     align-items: center;
-    padding: 15px;
+    gap: 10px;
+    padding: 15px; /* Beri padding di dalam item saja */
     border-bottom: 1px solid #f0f0f0;
-    width: 100%;
+    width: 100%; /* Pastikan memenuhi lebar card */
+}
+
+.cart-item:last-child {
+    border-bottom: none;
 }
 
 /* Pengaturan Teks Item */
 .cart-item-info {
-    flex: 1; /* Ambil semua sisa ruang di kiri */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -96,7 +100,7 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     font-size: 15px;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Menjaga agar tidak merusak baris */
+    text-overflow: ellipsis; /* Jika nama terlalu panjang akan jadi titik-titik */
 }
 
 .cart-item-price {
@@ -104,40 +108,62 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     color: var(--text-light);
 }
 
-.cart-item-subtotal {
-    display: none;
-}
-
 /* Area Tombol +/- */
 .cart-item-actions {
     display: flex;
-    flex-direction: row; /* Berjejer ke samping */
-    align-items: center;
+    align-items: center;    /* Tengah vertikal untuk seluruh baris */
     justify-content: center;
-    gap: 10px;
-    background: #f5f5f5;
-    padding: 5px 10px;
-    border-radius: 12px;
-    margin-left: 15px; /* Jarak aman agar tidak menempel ke teks nama */
-    flex-shrink: 0; /* JANGAN biarkan tombol mengecil jika nama menu panjang */
+    gap: 12px;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 25px;
+    height: 48px; /* Pastikan tinggi container konsisten */
 }
 
 .btn-qty {
     width: 36px;
     height: 36px;
     border: none;
-    border-radius: 8px;
-    font-size: 20px;
+    border-radius: 10px;
+    font-size: 24px; /* Simbol diperbesar agar lebih jelas */
     font-weight: 900;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 0;
     cursor: pointer;
+    
+    /* SOLUSI RATA TENGAH MATI-MATIAN */
+    display: inline-flex;
+    align-items: center;      /* Tengah vertikal */
+    justify-content: center;   /* Tengah horizontal */
+    line-height: 0;           /* Mematikan ruang teks bawah (descender) */
+    padding: 0;               /* Pastikan tidak ada padding yang mendorong simbol */
+    
+    transition: transform 0.1s;
 }
 
-.btn-minus { background: #ebebeb; color: var(--primary-red); }
-.btn-plus { background: var(--accent-yellow); color: var(--primary-red); }
+/* Angka Jumlah di Tengah */
+.cart-item-qty {
+    font-weight: 900;
+    font-size: 18px;
+    min-width: 25px;
+    text-align: center;
+    /* Pastikan angka juga ikut rata tengah */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Khusus untuk tombol minus agar terlihat lebih proporsional */
+.btn-minus {
+    background-color: #ebebeb;
+    color: var(--primary-red);
+    /* Sedikit penyesuaian visual jika simbol minus terasa terlalu rendah */
+    padding-bottom: 8px; 
+}
+
+.btn-plus {
+    background-color: var(--accent-yellow);
+    color: var(--primary-red);
+	padding-bottom: 4px;
+}
 
 /* Efek saat ditekan */
 .btn-qty:active {
@@ -145,11 +171,13 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     opacity: 0.8;
 }
 
+/* Angka Jumlah di antara tombol */
 .cart-item-qty {
-    font-weight: 800;
-    font-size: 16px;
+    font-weight: 900;
+    font-size: 18px;
     min-width: 25px;
     text-align: center;
+    color: var(--text-dark);
 }
 
 /* Subtotal di Paling Kanan */
@@ -263,33 +291,48 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     transition: opacity 0.3s;
 }
 
-.btn-export:disabled {
-    background-color: #eee;
-    color: #999;
-    border-color: #ddd !important;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
 /* History Table */
 .history-card { background: white; border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
 #history-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-#history-table th { background: var(--primary-red); color: white; padding: 10px; font-size: 12px; }
-#history-table td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 13px; }
+
+/* Header Tabel - Pastikan warna putih tetap terkunci */
+#history-table th { 
+    background: var(--primary-red); 
+    color: var(--pure-white) !important; 
+    padding: 10px; 
+    font-size: 12px; 
+}
+
+/* Kolom 1 (Waktu) - Paksa Lebar Sempit di TH dan TD */
+#history-table th:nth-child(1),
 #history-table td:nth-child(1) {
-    width: 55px; /* Diperkecil dari 70px/60px ke 55px */
+    width: 55px; 
     text-align: center;
     padding-left: 5px;
     padding-right: 5px;
+}
+
+#history-table td:nth-child(1) {
     font-size: 12px;
     color: var(--text-light);
 }
+
+/* Kolom 2 (Pesanan) */
 #history-table td:nth-child(2) {
     word-wrap: break-word;
-    line-height: 1.5; /* Memberi jarak antar baris menu agar enak dibaca */
+    line-height: 1.5;
     padding-top: 12px;
     padding-bottom: 12px;
-    vertical-align: middle; /* Menjaga teks tetap di tengah secara vertikal */
-    text-transform: capitalize; /* Opsional: agar huruf depan otomatis besar */}
-#history-table td:nth-child(3) { width: 95px; text-align: center; font-weight: bold; color: var(--primary-red); }
+    vertical-align: middle;
+    text-transform: capitalize;
+}
+
+/* Kolom 3 (Total) */
+#history-table td:nth-child(3) { 
+    width: 95px; 
+    text-align: center; 
+    font-weight: bold; 
+    color: var(--primary-red); 
+}
+
 #history-footer { background: var(--accent-yellow); font-weight: 900; text-align: center; }
