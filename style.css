@@ -41,7 +41,7 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     box-shadow: var(--shadow); border-bottom: 4px solid var(--accent-yellow);
 }
 .menu-card:active { transform: scale(0.96); background: var(--light-yellow); }
-.menu-name { display: block; font-weight: 700; font-size: 15px; }
+.menu-name { display: block; font-weight: 700; font-size: 13px; }
 .menu-price { color: var(--primary-red); font-weight: 800; font-size: 13px; }
 
 /* Detail Pesanan (Cart) */
