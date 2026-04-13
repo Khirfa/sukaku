@@ -75,29 +75,28 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 
 /* Styling Item di Dalam Keranjang agar Full & Rata */
 .cart-item {
-    display: grid;
-    grid-template-columns: 1fr auto auto; /* Nama (lebar) | Tombol | Subtotal */
+    display: flex;
+    justify-content: space-between; /* Paksa info ke kiri, tombol ke kanan */
     align-items: center;
-    gap: 10px;
-    padding: 15px; /* Beri padding di dalam item saja */
+    padding: 15px;
     border-bottom: 1px solid #f0f0f0;
-    width: 100%; /* Pastikan memenuhi lebar card */
+    width: 100%;
 }
 
 /* Pengaturan Teks Item */
 .cart-item-info {
+    flex: 1; /* Ambil semua sisa ruang di kiri */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Mencegah teks meluap */
+    overflow: hidden;
 }
 
 .cart-item-name {
     font-weight: 700;
-    font-size: 16px; /* Ukuran teks nama menu */
-    color: var(--text-dark);
-    white-space: nowrap; 
+    font-size: 15px;
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Menambahkan ... jika teks masih terlalu panjang */
+    text-overflow: ellipsis; /* Menjaga agar tidak merusak baris */
 }
 
 .cart-item-price {
@@ -112,43 +111,33 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 /* Area Tombol +/- */
 .cart-item-actions {
     display: flex;
-    flex-direction: row; /* Memastikan horizontal */
-    align-items: right;
+    flex-direction: row; /* Berjejer ke samping */
+    align-items: center;
     justify-content: center;
-    gap: 8px; /* Jarak antar elemen */
+    gap: 10px;
     background: #f5f5f5;
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 12px;
-    margin-left: 10px;
+    margin-left: 15px; /* Jarak aman agar tidak menempel ke teks nama */
+    flex-shrink: 0; /* JANGAN biarkan tombol mengecil jika nama menu panjang */
 }
 
 .btn-qty {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border: none;
     border-radius: 8px;
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 900;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 0;
     cursor: pointer;
-    transition: transform 0.1s;
 }
 
-/* Khusus untuk tombol minus agar terlihat lebih proporsional */
-.btn-minus { 
-    background: #ebebeb; 
-    color: var(--primary-red); 
-    padding-bottom: 0; 
-}
-
-.btn-plus { 
-    background: var(--accent-yellow); 
-    color: var(--primary-red); 
-    padding-bottom: 0; 
-}
+.btn-minus { background: #ebebeb; color: var(--primary-red); }
+.btn-plus { background: var(--accent-yellow); color: var(--primary-red); }
 
 /* Efek saat ditekan */
 .btn-qty:active {
@@ -159,17 +148,8 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 .cart-item-qty {
     font-weight: 800;
     font-size: 16px;
-    min-width: 25px; /* Memberi ruang agar angka tidak terhimpit tombol */
-    text-align: center;
-}
-
-/* Angka Jumlah di antara tombol */
-.cart-item-qty {
-    font-weight: 900;
-    font-size: 18px;
     min-width: 25px;
     text-align: center;
-    color: var(--text-dark);
 }
 
 /* Subtotal di Paling Kanan */
