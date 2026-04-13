@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sukaku-v2';
+const CACHE_NAME = 'sukaku-v3';
 // Daftar file yang akan disimpan secara offline
 const assets = [
   '/',
