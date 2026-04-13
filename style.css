@@ -162,7 +162,6 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
 .btn-plus {
     background-color: var(--accent-yellow);
     color: var(--primary-red);
-	padding-bottom: 4px;
 }
 
 /* Efek saat ditekan */
