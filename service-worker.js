@@ -39,3 +39,12 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
+self.addEventListener('install', event => {
+  self.skipWaiting(); // Paksa SW baru aktif tanpa nunggu tab ditutup
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(assets);
+    })
+  );
+});
