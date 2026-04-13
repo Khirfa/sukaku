@@ -148,33 +148,36 @@ function togglePaymentMethod(method) {
     hitungKembalian();
 }
 
-// Update fungsi simpanKeLokal untuk mencatat metode
+// MODIFIKASI FUNGSI SIMPAN (Tanpa Popup)
 function simpanKeLokal() {
     const cartItems = Object.values(cart);
     const cashRaw = document.getElementById('cash-amount').value.replace(/\./g, "");
     const cash = parseFloat(cashRaw) || 0;
 
-    if (cartItems.length === 0) return alert("Pilih menu dulu!");
-    if (cash < totalHarga) return alert("Uang pembayaran kurang!");
+    // Validasi tetap ada, tapi tanpa alert (tombol bisa dibuat mati jika tidak valid)
+    if (cartItems.length === 0 || cash < totalHarga) return;
 
     const transaksiBaru = {
         tanggal: new Date().toLocaleString('id-ID'),
         item: Object.values(cart).map(i => `${i.nama}(${i.quantity})`).join(", "),
         total: totalHarga,
-        metode: metodePembayaran // Catat Tunai atau QRIS
+        metode: metodePembayaran 
     };
 
     let antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
     antrean.push(transaksiBaru);
     localStorage.setItem('antrean_kasir', JSON.stringify(antrean));
 
-    alert(`✅ Berhasil! (Metode: ${metodePembayaran})`);
+    // Alert dihapus, langsung jalankan fungsi bersih-bersih
     resetCart();
     tampilkanRiwayat();
     
-    // Kembalikan ke Tunai setelah simpan
-    document.querySelector('input[value="Tunai"]').checked = true;
-    togglePaymentMethod('Tunai');
+    // Kembalikan ke metode Tunai
+    const tunaiRadio = document.querySelector('input[value="Tunai"]');
+    if (tunaiRadio) {
+        tunaiRadio.checked = true;
+        togglePaymentMethod('Tunai');
+    }
 }
 
 async function exportKeSheets() {
