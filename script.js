@@ -1,8 +1,8 @@
 const menuFriedChicken = [
     { id: 'dad', nama: "Dada", harga: 9000 },
     { id: 'pat', nama: "Paha Atas", harga: 9000 },
-    { id: 'pab', nama: "Paha Bawah", harga: 7000 },
     { id: 'say', nama: "Sayap", harga: 7000 },
+    { id: 'pab', nama: "Paha Bawah", harga: 7000 },
     { id: 'nas', nama: "Nasi", harga: 3000 },
     { id: 'sam', nama: "Sambal Bawang", harga: 3000 }
 ];
