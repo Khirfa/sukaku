@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SUKAKU - Kasir</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b71c1c">
 </head>
 <body>
 
     <header>
-        <div class="logo-container">
-            <div class="logo-oval">
-                <span class="brand-name">SUKAKU</span>
-                <span class="brand-sub">FRIED CHICKEN</span>
-            </div>
+        <div class="logo-oval">
+            <span class="brand-name">SUKAKU</span>
+            <span class="brand-sub">FRIED CHICKEN</span>
         </div>
     </header>
 
     <main class="pos-container">
-        <section class="menu-section">
+        <section>
             <h2 class="section-title">Menu Utama</h2>
             <div id="menu-items" class="menu-grid"></div>
         </section>
@@ -27,33 +27,32 @@
         <section class="cart-section">
             <h2 class="section-title">Detail Pesanan</h2>
             <div class="cart-card">
-                <div id="cart-list" class="cart-list">
-                    <p class="empty-cart-msg">Keranjang masih kosong.</p>
-                </div>
+                <div id="cart-list" class="cart-list"></div>
                 
                 <div class="summary-area">
                     <div class="total-row">
                         <span>Total Akhir</span>
-                        <span id="total-price" class="total-amount">Rp 0</span>
+                        <span id="total-price">Rp 0</span>
                     </div>
                     
-					<div class="payment-input-area">
-					<label>Metode Pembayaran</label>
-						<div class="method-options">
-							<label class="method-item">
-								<input type="radio" name="pay-method" value="Tunai" checked onclick="togglePaymentMethod('Tunai')"> 
-								<span><i class="fas fa-money-bill-wave"></i> Tunai</span>
-							</label>
-							<label class="method-item">
-								<input type="radio" name="pay-method" value="QRIS" onclick="togglePaymentMethod('QRIS')"> 
-								<span><i class="fas fa-qrcode"></i> QRIS</span>
-							</label>
-						</div>
-						<div id="cash-input-group">
-							<label for="cash-amount">Uang Tunai (Bayar)</label>
-							<input type="text" id="cash-amount" inputmode="numeric" placeholder="0" oninput="formatRibuan(this)">
-						</div>
-					</div>
+                    <div class="payment-input-area">
+                        <label>Metode Pembayaran</label>
+                        <div class="method-options">
+                            <label class="method-item">
+                                <input type="radio" name="pay-method" value="Tunai" checked onclick="togglePaymentMethod('Tunai')"> 
+                                <span><i class="fas fa-money-bill-wave"></i> Tunai</span>
+                            </label>
+                            <label class="method-item">
+                                <input type="radio" name="pay-method" value="QRIS" onclick="togglePaymentMethod('QRIS')"> 
+                                <span><i class="fas fa-qrcode"></i> QRIS</span>
+                            </label>
+                        </div>
+
+                        <div id="cash-input-group">
+                            <label for="cash-amount">Uang Tunai (Bayar)</label>
+                            <input type="text" id="cash-amount" inputmode="numeric" placeholder="0" oninput="formatRibuan(this)">
+                        </div>
+                    </div>
                     
                     <div class="change-row">
                         <span>Kembalian</span>
@@ -63,21 +62,15 @@
             </div>
 
             <div class="action-buttons">
-                <button onclick="simpanKeLokal()" class="btn-simpan">
-                    <i class="fas fa-save"></i> SIMPAN TRANSAKSI
-                </button>
+                <button onclick="simpanKeLokal()" class="btn-simpan">SIMPAN TRANSAKSI</button>
                 <div class="secondary-btns">
-                    <button onclick="exportKeSheets()" class="btn-export" disabled>
-                        <i class="fas fa-file-export"></i> Export
-                    </button>
-                    <button onclick="resetCart()" class="btn-reset">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
+                    <button class="btn-export" disabled>Export</button>
+                    <button onclick="resetCart()" class="btn-reset">Reset</button>
                 </div>
             </div>
         </section>
 
-        <section class="history-section">
+        <section>
             <h2 class="section-title">Riwayat Penjualan</h2>
             <div class="history-card">
                 <table id="history-table">
@@ -89,14 +82,17 @@
                         </tr>
                     </thead>
                     <tbody id="history-body"></tbody>
-                    <tfoot id="history-footer">
-                        <tr class="income-row">
-                            <td colspan="2">TOTAL PENDAPATAN</td>
+                    <tfoot>
+                        <tr id="history-footer">
+                            <td colspan="2" style="padding-left:15px; text-align:left;">TOTAL PENDAPATAN</td>
                             <td id="grand-total-income">Rp 0</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+            <button onclick="hapusSemuaRiwayat()" style="margin-top:15px; width:100%; padding:10px; border:none; background:none; color:#ccc; font-size:12px;">
+                <i class="fas fa-trash"></i> Hapus Semua Riwayat Uji Coba
+            </button>
         </section>
     </main>
 
