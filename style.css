@@ -84,23 +84,20 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     width: 100%; /* Pastikan memenuhi lebar card */
 }
 
-.cart-item:last-child {
-    border-bottom: none;
-}
-
 /* Pengaturan Teks Item */
 .cart-item-info {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* Mencegah teks meluap */
 }
 
 .cart-item-name {
     font-weight: 700;
-    font-size: 15px;
-    white-space: nowrap;
+    font-size: 16px; /* Ukuran teks nama menu */
+    color: var(--text-dark);
+    white-space: nowrap; 
     overflow: hidden;
-    text-overflow: ellipsis; /* Jika nama terlalu panjang akan jadi titik-titik */
+    text-overflow: ellipsis; /* Menambahkan ... jika teks masih terlalu panjang */
 }
 
 .cart-item-price {
@@ -108,16 +105,13 @@ header { padding: 30px 15px; display: flex; justify-content: center; }
     color: var(--text-light);
 }
 
+.cart-item-subtotal {
+    display: none;
+}
+
 /* Area Tombol +/- */
 .cart-item-actions {
-    display: flex;
-    align-items: center;    /* Tengah vertikal untuk seluruh baris */
-    justify-content: center;
-    gap: 12px;
-    background: #f0f0f0;
-    padding: 6px 12px;
-    border-radius: 25px;
-    height: 48px; /* Pastikan tinggi container konsisten */
+    justify-self: end;
 }
 
 .btn-qty {
