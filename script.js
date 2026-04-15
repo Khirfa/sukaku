@@ -157,7 +157,12 @@ function simpanKeLokal() {
     tampilkanRiwayat();
 }
 
+let isCopying = false; // Tambahkan variabel kontrol di luar fungsi
+
 async function salinLaporan() {
+    // Jika sedang dalam proses animasi "Berhasil Disalin", hentikan klik tambahan
+    if (isCopying) return;
+
     const antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
     if (antrean.length === 0) return;
 
@@ -185,12 +190,29 @@ async function salinLaporan() {
 
     try {
         await navigator.clipboard.writeText(teks);
+        
+        // Aktifkan status sedang menyalin
+        isCopying = true;
+        
         const btn = document.getElementById('btn-lapor');
         const oldText = btn.innerHTML;
+        const oldBg = btn.style.background; // Simpan warna asli
+
         btn.innerHTML = `<i class="fas fa-check"></i> BERHASIL DISALIN!`;
         btn.style.background = "#2e7d32";
-        setTimeout(() => { btn.innerHTML = oldText; btn.style.background = "#075E54"; }, 2000);
-    } catch (err) { console.error('Gagal salin', err); }
+        btn.style.pointerEvents = "none"; // Nonaktifkan klik secara fisik
+
+        setTimeout(() => { 
+            btn.innerHTML = oldText; 
+            btn.style.background = oldBg || "#075E54"; 
+            btn.style.pointerEvents = "auto"; // Aktifkan kembali klik
+            isCopying = false; // Reset status
+        }, 2000);
+
+    } catch (err) { 
+        console.error('Gagal salin', err); 
+        isCopying = false;
+    }
 }
 
 function tampilkanRiwayat() {
