@@ -48,6 +48,8 @@
                             </label>
                         </div>
 
+                        <div id="qris-display-area" style="margin-bottom: 15px; display: none;"></div>
+
                         <div id="cash-input-group">
                             <label for="cash-amount">Uang Tunai (Bayar)</label>
                             <input type="text" id="cash-amount" inputmode="numeric" placeholder="0" oninput="formatRibuan(this)">
@@ -90,7 +92,12 @@
                     </tfoot>
                 </table>
             </div>
-            <button onclick="hapusSemuaRiwayat()" style="margin-top:15px; width:100%; padding:10px; border:none; background:none; color:#ccc; font-size:12px;">
+            
+            <button id="btn-lapor" onclick="salinLaporan()" style="margin-top: 15px; width: 100%; padding: 15px; background: #075E54; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s;">
+                <i class="fas fa-copy"></i> SALIN LAPORAN DETAIL
+            </button>
+
+            <button onclick="hapusSemuaRiwayat()" style="margin-top:20px; width:100%; padding:10px; border:none; background:none; color:#ccc; font-size:11px;">
                 <i class="fas fa-trash"></i> Hapus Semua Riwayat Uji Coba
             </button>
         </section>
