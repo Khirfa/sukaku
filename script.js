@@ -2,7 +2,7 @@ const menuFriedChicken = [
     { id: 'dad', nama: "Dada", harga: 9000 },
     { id: 'pat', nama: "Paha Atas", harga: 9000 },
     { id: 'say', nama: "Sayap", harga: 7000 },
-    { id: 'pab', nama: "Paha Bawah", harga: 7000 },
+	{ id: 'pab', nama: "Paha Bawah", harga: 7000 },
     { id: 'nas', nama: "Nasi", harga: 3000 },
     { id: 'sam', nama: "Sambal Bawang", harga: 3000 }
 ];
@@ -11,7 +11,6 @@ let cart = {};
 let totalHarga = 0;
 let metodePembayaran = "Tunai";
 
-// 1. Render Menu Utama
 function renderMenu() {
     const menuDiv = document.getElementById('menu-items');
     if (!menuDiv) return;
@@ -23,7 +22,6 @@ function renderMenu() {
     `).join('');
 }
 
-// 2. Kelola Jumlah Item di Keranjang
 function updateItemQuantity(itemId, change) {
     const item = menuFriedChicken.find(m => m.id === itemId);
     if (!cart[itemId]) {
@@ -35,7 +33,6 @@ function updateItemQuantity(itemId, change) {
     updateDisplay();
 }
 
-// 3. Update Tampilan Keranjang (Detail Pesanan)
 function updateDisplay() {
     const cartList = document.getElementById('cart-list');
     const totalSpan = document.getElementById('total-price');
@@ -54,7 +51,6 @@ function updateDisplay() {
         if(cashInput) cashInput.disabled = false;
         cartItems.forEach(item => {
             totalHarga += (item.harga * item.quantity);
-            
             const li = document.createElement('div');
             li.className = 'cart-item';
             li.innerHTML = `
@@ -73,21 +69,20 @@ function updateDisplay() {
     }
     
     if(totalSpan) totalSpan.innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
+    
+    // Jika sedang mode QRIS, update nominal otomatis saat item berubah
+    if(metodePembayaran === "QRIS") togglePaymentMethod("QRIS");
+    
     hitungKembalian();
 }
 
-// 4. Format Input Uang (Ribuan)
 function formatRibuan(input) {
     let value = input.value.replace(/[^0-9]/g, "");
-    if (value) {
-        input.value = parseInt(value).toLocaleString('id-ID');
-    } else {
-        input.value = "";
-    }
+    if (value) input.value = parseInt(value).toLocaleString('id-ID');
+    else input.value = "";
     hitungKembalian();
 }
 
-// 5. Hitung Kembalian Otomatis
 function hitungKembalian() {
     const cashInput = document.getElementById('cash-amount');
     const changeSpan = document.getElementById('change-amount');
@@ -109,25 +104,35 @@ function hitungKembalian() {
     }
 }
 
-// 6. Pilih Metode Pembayaran (Tunai/QRIS)
 function togglePaymentMethod(method) {
     metodePembayaran = method;
     const cashInput = document.getElementById('cash-amount');
     const inputGroup = document.getElementById('cash-input-group');
+    const qrisArea = document.getElementById('qris-display-area');
 
     if (method === "QRIS") {
         cashInput.value = totalHarga.toLocaleString('id-ID');
         cashInput.readOnly = true;
         if(inputGroup) inputGroup.style.opacity = "0.5"; 
+        
+        qrisArea.style.display = "block";
+        qrisArea.innerHTML = `
+            <div style="background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #fbc02d; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <span style="font-size: 11px; font-weight: 800; color: #757575;">TOTAL SCAN:</span>
+                <h2 style="color: #b71c1c; margin-bottom: 10px; font-weight: 900;">Rp ${totalHarga.toLocaleString('id-ID')}</h2>
+                <img src="qris.jpg" style="width: 100%; max-width: 180px; border-radius: 8px;">
+                <p style="font-size: 10px; color: #777; margin-top: 8px;">*Pelanggan masukkan nominal manual</p>
+            </div>
+        `;
     } else {
         cashInput.value = "";
         cashInput.readOnly = false;
         if(inputGroup) inputGroup.style.opacity = "1";
+        qrisArea.style.display = "none";
     }
     hitungKembalian();
 }
 
-// 7. Simpan Transaksi (Tanpa Popup)
 function simpanKeLokal() {
     const cartItems = Object.values(cart);
     const cashRaw = document.getElementById('cash-amount').value.replace(/\./g, "");
@@ -135,7 +140,6 @@ function simpanKeLokal() {
 
     if (cartItems.length === 0 || cash < totalHarga) return;
 
-    // Format item per baris: Nama (Qty)
     const itemString = cartItems.map(i => `${i.nama} (${i.quantity})`).join("<br>");
 
     const transaksiBaru = {
@@ -151,16 +155,44 @@ function simpanKeLokal() {
 
     resetCart();
     tampilkanRiwayat();
-
-    // Kembalikan UI ke Tunai
-    const tunaiRadio = document.querySelector('input[value="Tunai"]');
-    if(tunaiRadio) {
-        tunaiRadio.checked = true;
-        togglePaymentMethod('Tunai');
-    }
 }
 
-// 8. Render Tabel Riwayat
+async function salinLaporan() {
+    const antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
+    if (antrean.length === 0) return;
+
+    let totalOmzet = 0;
+    let rekapMenu = {};
+
+    antrean.forEach((transaksi) => {
+        totalOmzet += transaksi.total;
+        const items = transaksi.item.split("<br>");
+        items.forEach(itemStr => {
+            const match = itemStr.match(/(.*)\s\((\d+)\)/);
+            if (match) {
+                const namaMenu = match[1].trim();
+                const qty = parseInt(match[2]);
+                rekapMenu[namaMenu] = (rekapMenu[namaMenu] || 0) + qty;
+            }
+        });
+    });
+
+    let teks = `*LAPORAN DETAIL SUKAKU*\nTanggal: ${new Date().toLocaleDateString('id-ID')}\n----------------------------\n*RINCIAN TERJUAL:*\n`;
+    for (const [menu, jumlah] of Object.entries(rekapMenu)) {
+        teks += `• ${menu}: *${jumlah}*\n`;
+    }
+    teks += `----------------------------\n✅ *Total Transaksi:* ${antrean.length}\n💰 *TOTAL OMZET:* *Rp ${totalOmzet.toLocaleString('id-ID')}*\n----------------------------`;
+
+    try {
+        await navigator.clipboard.writeText(teks);
+        const btn = document.getElementById('btn-lapor');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = `<i class="fas fa-check"></i> BERHASIL DISALIN!`;
+        btn.style.background = "#2e7d32";
+        setTimeout(() => { btn.innerHTML = oldText; btn.style.background = "#075E54"; }, 2000);
+    } catch (err) { console.error('Gagal salin', err); }
+}
+
 function tampilkanRiwayat() {
     const antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
     const body = document.getElementById('history-body');
@@ -179,26 +211,25 @@ function tampilkanRiwayat() {
     document.getElementById('grand-total-income').innerText = `Rp ${income.toLocaleString('id-ID')}`;
 }
 
-// 9. Reset Keranjang
 function resetCart() { 
     cart = {}; 
     const cashInput = document.getElementById('cash-amount');
     if(cashInput) cashInput.value = ''; 
+    const tunaiRadio = document.querySelector('input[value="Tunai"]');
+    if(tunaiRadio) { tunaiRadio.checked = true; togglePaymentMethod('Tunai'); }
     updateDisplay(); 
 }
 
-// 10. Hapus Semua Data (Uji Coba)
 function hapusSemuaRiwayat() {
-    localStorage.removeItem('antrean_kasir');
-    tampilkanRiwayat();
+    if(confirm("Hapus semua riwayat hari ini?")) {
+        localStorage.removeItem('antrean_kasir');
+        tampilkanRiwayat();
+    }
 }
 
-// Fitur PWA: Registrasi Service Worker (Agar bisa Offline)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('SW Terdaftar'))
-            .catch(err => console.log('SW Gagal', err));
+        navigator.serviceWorker.register('/service-worker.js').catch(err => console.log(err));
     });
 }
 
