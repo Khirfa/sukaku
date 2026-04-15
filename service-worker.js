@@ -1,50 +1,31 @@
-const CACHE_NAME = 'sukaku-v3';
-// Daftar file yang akan disimpan secara offline
+const CACHE_NAME = 'sukaku-v6';
 const assets = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
   '/manifest.json',
+  '/qris.jpg', // Pastikan file gambar ini ada
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
-// Tahap Install: Simpan semua file ke Cache
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('Caching assets...');
-      return cache.addAll(assets);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
   );
 });
 
-// Tahap Fetch: Ambil file dari Cache jika sedang offline
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      // Gunakan file dari cache jika ada, jika tidak ambil dari jaringan
-      return cachedResponse || fetch(event.request);
-    })
+    caches.match(event.request).then(response => response || fetch(event.request))
   );
 });
 
-// Tahap Aktivasi: Hapus cache lama jika ada update
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
-  );
-});
-
-self.addEventListener('install', event => {
-  self.skipWaiting(); // Paksa SW baru aktif tanpa nunggu tab ditutup
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
-    })
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    ))
   );
 });
