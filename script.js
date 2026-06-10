@@ -96,7 +96,8 @@ function hitungKembalian() {
     
     let pembandingHarga = totalHarga;
     if (metodePembayaran === "DP") {
-        pembandingHarga = totalHarga * 0.5;
+        // Hitung 50%, lalu bulatkan ke bawah ke kelipatan 1.000 terdekat
+        pembandingHarga = Math.floor((totalHarga * 0.5) / 1000) * 1000;
     }
 
     const kembalian = cash - pembandingHarga;
@@ -135,11 +136,12 @@ function togglePaymentMethod(method) {
             </div>
         `;
     } else if (method === "DP") {
-        const nilaiDP = totalHarga * 0.5;
-        cashInput.value = nilaiDP.toLocaleString('id-ID');
+        // Hitung 50% lalu bulatkan ke bawah ke kelipatan 1.000 (Contoh: 100.500 jadi 100.000)
+        const nilaiDPBulat = Math.floor((totalHarga * 0.5) / 1000) * 1000;
+        cashInput.value = nilaiDPBulat.toLocaleString('id-ID');
         cashInput.readOnly = true; 
         if(inputGroup) inputGroup.style.opacity = "0.5";
-        if(cashLabel) cashLabel.innerText = "Uang Muka / DP (50%)";
+        if(cashLabel) cashLabel.innerText = "Uang Muka / DP (Dibulatkan Ke Bawah)";
         qrisArea.style.display = "none";
     } else {
         cashInput.value = "";
@@ -160,8 +162,14 @@ function simpanKeLokal() {
     if (cartItems.length === 0) return;
 
     let totalFinalTransaksi = totalHarga;
+    let sisaKurang = 0;
+    let totalAsliSebelumDP = totalHarga;
+
     if (metodePembayaran === "DP") {
-        totalFinalTransaksi = totalHarga * 0.5;
+        // Nilai masuk omzet hari ini adalah DP yang sudah dibulatkan ke bawah
+        totalFinalTransaksi = Math.floor((totalHarga * 0.5) / 1000) * 1000;
+        // Sisa yang belum dibayar (Total asli - DP bulat)
+        sisaKurang = totalAsliSebelumDP - totalFinalTransaksi;
     }
 
     if (cash < totalFinalTransaksi) return;
@@ -171,7 +179,9 @@ function simpanKeLokal() {
     const transaksiBaru = {
         tanggal: new Date().toLocaleString('id-ID'),
         item: itemString,
-        total: totalFinalTransaksi,
+        total: totalFinalTransaksi, // Uang masuk kasir hari ini (DP bulat)
+        totalAsli: totalAsliSebelumDP,
+        kurang: sisaKurang,
         metode: metodePembayaran,
         bayar: cash,
         kembalian: cash - totalFinalTransaksi,
@@ -192,7 +202,7 @@ async function salinLaporan() {
     const antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
     if (antrean.length === 0) return;
 
-    let totalOmzet = 0;
+    let totalOmzetHarian = 0; // Gabungan Tunai + QRIS + Semua DP masuk hari ini
     let omzetTunai = 0;
     let omzetQris = 0;
     let omzetDP = 0;
@@ -201,29 +211,24 @@ async function salinLaporan() {
     let jumlahDP = 0;
     
     let rekapHarian = {};
-    let teksPesananAcara = ""; // Menampung teks rincian katering yang dipisah per pesanan
-    let nomorPesananAcara = 1; // Penghitung otomatis Pesanan 1, Pesanan 2, dst
+    let teksPesananAcara = ""; 
+    let nomorPesananAcara = 1; 
     let rincianCatatanTeks = "";
 
     antrean.forEach((transaksi) => {
-        totalOmzet += transaksi.total;
+        totalOmzetHarian += transaksi.total;
         
         const items = transaksi.item.split("<br>");
 
-        // 1. JIKA METODE PEMBAYARAN ADALAH DP (PESANAN ACARA)
         if (transaksi.metode === "DP") {
             omzetDP += transaksi.total;
             jumlahDP++;
 
-            // Ambil waktu transaksi untuk cadangan jika catatan kosong
             const waktu = transaksi.tanggal.split(' ')[1]?.substring(0,5) || '--:--';
-            // Gunakan input catatan kasir sebagai judul keterangan acara, jika kosong beri nama default
             const infoAcara = transaksi.catatan && transaksi.catatan !== "" ? transaksi.catatan : `Jam ${waktu}`;
 
-            // Susun teks pembuka untuk Pesanan Acara ke-X
+            // Susun rincian sesuai request: Total, DP masuk (bulat), Sisa Kurangnya
             teksPesananAcara += `*Pesanan ${nomorPesananAcara} (${infoAcara}):*\n`;
-
-            // Masukkan item menu khusus untuk pesanan ini saja
             items.forEach(itemStr => {
                 const match = itemStr.match(/(.*)\s\((\d+)\)/);
                 if (match) {
@@ -232,11 +237,12 @@ async function salinLaporan() {
                     teksPesananAcara += `  - ${namaMenu}: *${qty}*\n`;
                 }
             });
-            teksPesananAcara += `  Total DP (50%): Rp ${transaksi.total.toLocaleString('id-ID')}\n\n`;
+            teksPesananAcara += `    Total Pesanan : Rp ${transaksi.totalAsli.toLocaleString('id-ID')}\n`;
+            teksPesananAcara += `    DP Masuk (50%): Rp ${transaksi.total.toLocaleString('id-ID')} \n`;
+            teksPesananAcara += `    Sisa Kurang   : Rp ${transaksi.kurang.toLocaleString('id-ID')}\n\n`;
             
-            nomorPesananAcara++; // Naikkan nomor urut untuk pesanan DP berikutnya
+            nomorPesananAcara++;
 
-        // 2. JIKA METODE PEMBAYARAN ADALAH TUNAI / QRIS (PESANAN HARIAN)
         } else {
             if (transaksi.metode === "QRIS") {
                 omzetQris += transaksi.total;
@@ -246,13 +252,11 @@ async function salinLaporan() {
                 jumlahTunai++;
             }
 
-            // Kumpulkan catatan belanja harian biasa
             if (transaksi.catatan && transaksi.catatan !== "") {
                 const waktu = transaksi.tanggal.split(' ')[1]?.substring(0,5) || '--:--';
                 rincianCatatanTeks += `- [${waktu}] ${transaksi.catatan}\n`;
             }
 
-            // Rekap item masuk ke penjualan harian biasa
             items.forEach(itemStr => {
                 const match = itemStr.match(/(.*)\s\((\d+)\)/);
                 if (match) {
@@ -264,13 +268,11 @@ async function salinLaporan() {
         }
     });
 
-    // MENYUSUN TEKS LAPORAN FINAL
     let teks = `*LAPORAN DETAIL SUKAKU*\n`;
     teks += `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n`;
     teks += `----------------------------\n`;
-    teks += `*RINCIAN TERJUAL:*\n`;
+    teks += `*RINCIAN PENJUALAN:*\n`;
     
-    // Tampilkan rincian penjualan harian biasa
     if (Object.keys(rekapHarian).length > 0) {
         for (const [menu, jumlah] of Object.entries(rekapHarian)) {
             teks += `- ${menu}: *${jumlah}*\n`;
@@ -279,13 +281,11 @@ async function salinLaporan() {
         teks += `- Belum ada penjualan harian\n`;
     }
     
-    // TAMPILKAN REKAP ACARA SECARA TERPISAH PER PESANAN (JIKA ADA)
     if (teksPesananAcara !== "") {
         teks += `----------------------------\n`;
-        teks += `*REKAP PESANAN ACARA:*\n\n${teksPesananAcara}`;
+        teks += `*DETAIL PESANAN:*\n\n${teksPesananAcara}`;
     }
 
-    // TAMPILKAN CATATAN TRANSAKSI HARIAN BIASA
     if (rincianCatatanTeks !== "") {
         teks += `----------------------------\n`;
         teks += `*CATATAN PESANAN HARI INI:*\n${rincianCatatanTeks}`;
@@ -297,14 +297,12 @@ async function salinLaporan() {
     teks += `QRIS: ${jumlahQris} transaksi sebanyak Rp ${omzetQris.toLocaleString('id-ID')}\n`;
     teks += `DP / Uang Muka: ${jumlahDP} transaksi sebanyak Rp ${omzetDP.toLocaleString('id-ID')}\n\n`;
     teks += `Total Transaksi: ${antrean.length}\n`;
-    teks += `*TOTAL OMZET:* *Rp ${totalOmzet.toLocaleString('id-ID')}*\n`;
+    teks += `*TOTAL OMZET MASUK:* *Rp ${totalOmzetHarian.toLocaleString('id-ID')}*\n`;
     teks += `----------------------------`;
 
-    // PROSES COPY TO CLIPBOARD
     try {
         await navigator.clipboard.writeText(teks);
         isCopying = true;
-        
         const btn = document.getElementById('btn-lapor');
         const oldText = btn.innerHTML;
         const oldBg = btn.style.background;
