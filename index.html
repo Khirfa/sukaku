@@ -19,11 +19,13 @@
     </header>
 
     <main class="pos-container">
+        <!-- Section: Menu Utama -->
         <section>
             <h2 class="section-title">Menu Utama</h2>
             <div id="menu-items" class="menu-grid"></div>
         </section>
 
+        <!-- Section: Detail Pesanan -->
         <section class="cart-section">
             <h2 class="section-title">Detail Pesanan</h2>
             <div class="cart-card">
@@ -37,7 +39,7 @@
                     
                     <div class="payment-input-area">
                         <label>Metode Pembayaran</label>
-                        <div class="method-options">
+                        <div class="method-options" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
                             <label class="method-item">
                                 <input type="radio" name="pay-method" value="Tunai" checked onclick="togglePaymentMethod('Tunai')"> 
                                 <span><i class="fas fa-money-bill-wave"></i> Tunai</span>
@@ -46,12 +48,18 @@
                                 <input type="radio" name="pay-method" value="QRIS" onclick="togglePaymentMethod('QRIS')"> 
                                 <span><i class="fas fa-qrcode"></i> QRIS</span>
                             </label>
+                            <!-- Pilihan Metode Baru -->
+                            <label class="method-item">
+                                <input type="radio" name="pay-method" value="DP" onclick="togglePaymentMethod('DP')"> 
+                                <span><i class="fas fa-hand-holding-usd"></i> DP</span>
+                            </label>
                         </div>
 
+                        <!-- Tempat tampilan QRIS dinamis via script.js -->
                         <div id="qris-display-area" style="margin-bottom: 15px; display: none;"></div>
 
                         <div id="cash-input-group">
-                            <label for="cash-amount">Uang Tunai (Bayar)</label>
+                            <label for="cash-amount" id="cash-label">Uang Tunai (Bayar)</label>
                             <input type="text" id="cash-amount" inputmode="numeric" placeholder="0" oninput="formatRibuan(this)">
                         </div>
                     </div>
@@ -63,6 +71,12 @@
                 </div>
             </div>
 
+            <!-- Input Catatan Opsional -->
+            <div style="margin-top: 15px;">
+                <label for="order-note" style="font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 5px; display: block;">Catatan Pesanan (Opsional)</label>
+                <input type="text" id="order-note" placeholder="Contoh: Pembungkus dipisah / Nama Pembeli" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px;">
+            </div>
+
             <div class="action-buttons">
                 <button onclick="simpanKeLokal()" class="btn-simpan">SIMPAN TRANSAKSI</button>
                 <div class="secondary-btns">
@@ -72,6 +86,7 @@
             </div>
         </section>
 
+        <!-- Section: Riwayat Penjualan -->
         <section>
             <h2 class="section-title">Riwayat Penjualan</h2>
             <div class="history-card">
