@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sukaku-v9';
+const CACHE_NAME = 'sukaku-v10';
 const assets = [
   '/',
   '/index.html',
