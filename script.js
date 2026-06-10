@@ -19,7 +19,7 @@ function renderMenu() {
     menuDiv.innerHTML = menuFriedChicken.map(item => `
         <div class="menu-card" onclick="updateItemQuantity('${item.id}', 1)">
             <span class="menu-name">${item.nama}</span>
-            <span class="menu-price">Rp ${item.harga.toLocaleString('id-ID')}</span>
+            <span class="menu-price">${item.harga.toLocaleString('id-ID')}</span>
         </div>
     `).join('');
 }
@@ -58,7 +58,7 @@ function updateDisplay() {
             li.innerHTML = `
                 <div class="cart-item-info">
                     <span class="cart-item-name">${item.nama}</span>
-                    <span class="cart-item-price">@ Rp ${item.harga.toLocaleString('id-ID')}</span>
+                    <span class="cart-item-price">@ ${item.harga.toLocaleString('id-ID')}</span>
                 </div>
                 <div class="cart-item-actions">
                     <button onclick="event.stopPropagation(); updateItemQuantity('${item.id}', -1)" class="btn-qty btn-minus">-</button>
@@ -70,7 +70,8 @@ function updateDisplay() {
         });
     }
     
-    if(totalSpan) totalSpan.innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
+    // PENGHAPUSAN RP: Di Total Akhir Keranjang Belanja
+    if(totalSpan) totalSpan.innerText = totalHarga.toLocaleString('id-ID');
     
     if(metodePembayaran === "QRIS" || metodePembayaran === "DP") {
         togglePaymentMethod(metodePembayaran);
@@ -96,20 +97,20 @@ function hitungKembalian() {
     
     let pembandingHarga = totalHarga;
     if (metodePembayaran === "DP") {
-        // Hitung 50%, lalu bulatkan ke bawah ke kelipatan 1.000 terdekat
         pembandingHarga = Math.floor((totalHarga * 0.5) / 1000) * 1000;
     }
 
     const kembalian = cash - pembandingHarga;
     
     if (totalHarga === 0 || cash === 0) {
-        changeSpan.innerText = "Rp 0";
+        changeSpan.innerText = "0";
         changeSpan.style.color = "#757575";
     } else if (kembalian < 0) {
         changeSpan.innerText = "Uang Kurang!";
         changeSpan.style.color = "#b71c1c";
     } else {
-        changeSpan.innerText = `Rp ${kembalian.toLocaleString('id-ID')}`;
+        // PENGHAPUSAN RP: Di teks Nominal Kembalian uang
+        changeSpan.innerText = kembalian.toLocaleString('id-ID');
         changeSpan.style.color = "#2e7d32";
     }
 }
@@ -130,13 +131,13 @@ function togglePaymentMethod(method) {
         qrisArea.innerHTML = `
             <div style="background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid #fbc02d; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <span style="font-size: 11px; font-weight: 800; color: #757575;">TOTAL SCAN:</span>
-                <h2 style="color: #b71c1c; margin-bottom: 10px; font-weight: 900;">Rp ${totalHarga.toLocaleString('id-ID')}</h2>
+                <!-- PENGHAPUSAN RP: Di tampilan nominal Pop-up QRIS -->
+                <h2 style="color: #b71c1c; margin-bottom: 10px; font-weight: 900;">${totalHarga.toLocaleString('id-ID')}</h2>
                 <img src="qris.jpg" style="width: 100%; max-width: 180px; border-radius: 8px;">
                 <p style="font-size: 10px; color: #777; margin-top: 8px;">*Pelanggan masukkan nominal manual</p>
             </div>
         `;
     } else if (method === "DP") {
-        // Hitung 50% lalu bulatkan ke bawah ke kelipatan 1.000 (Contoh: 100.500 jadi 100.000)
         const nilaiDPBulat = Math.floor((totalHarga * 0.5) / 1000) * 1000;
         cashInput.value = nilaiDPBulat.toLocaleString('id-ID');
         cashInput.readOnly = true; 
@@ -166,9 +167,7 @@ function simpanKeLokal() {
     let totalAsliSebelumDP = totalHarga;
 
     if (metodePembayaran === "DP") {
-        // Nilai masuk omzet hari ini adalah DP yang sudah dibulatkan ke bawah
         totalFinalTransaksi = Math.floor((totalHarga * 0.5) / 1000) * 1000;
-        // Sisa yang belum dibayar (Total asli - DP bulat)
         sisaKurang = totalAsliSebelumDP - totalFinalTransaksi;
     }
 
@@ -179,7 +178,7 @@ function simpanKeLokal() {
     const transaksiBaru = {
         tanggal: new Date().toLocaleString('id-ID'),
         item: itemString,
-        total: totalFinalTransaksi, // Uang masuk kasir hari ini (DP bulat)
+        total: totalFinalTransaksi, 
         totalAsli: totalAsliSebelumDP,
         kurang: sisaKurang,
         metode: metodePembayaran,
@@ -202,7 +201,7 @@ async function salinLaporan() {
     const antrean = JSON.parse(localStorage.getItem('antrean_kasir')) || [];
     if (antrean.length === 0) return;
 
-    let totalOmzetHarian = 0; // Gabungan Tunai + QRIS + Semua DP masuk hari ini
+    let totalOmzetHarian = 0; 
     let omzetTunai = 0;
     let omzetQris = 0;
     let omzetDP = 0;
@@ -227,7 +226,6 @@ async function salinLaporan() {
             const waktu = transaksi.tanggal.split(' ')[1]?.substring(0,5) || '--:--';
             const infoAcara = transaksi.catatan && transaksi.catatan !== "" ? transaksi.catatan : `Jam ${waktu}`;
 
-            // Susun rincian sesuai request: Total, DP masuk (bulat), Sisa Kurangnya
             teksPesananAcara += `*Pesanan ${nomorPesananAcara} (${infoAcara}):*\n`;
             items.forEach(itemStr => {
                 const match = itemStr.match(/(.*)\s\((\d+)\)/);
@@ -237,8 +235,9 @@ async function salinLaporan() {
                     teksPesananAcara += `  - ${namaMenu}: *${qty}*\n`;
                 }
             });
+            // Catatan WA Bos tetap menggunakan kata "Rp" agar teks laporan formal terbaca jelas
             teksPesananAcara += `    Total Pesanan : Rp ${transaksi.totalAsli.toLocaleString('id-ID')}\n`;
-            teksPesananAcara += `    DP Masuk (50%): Rp ${transaksi.total.toLocaleString('id-ID')} \n`;
+            teksPesananAcara += `    DP Masuk (50%): Rp ${transaksi.total.toLocaleString('id-ID')}\n`;
             teksPesananAcara += `    Sisa Kurang   : Rp ${transaksi.kurang.toLocaleString('id-ID')}\n\n`;
             
             nomorPesananAcara++;
@@ -293,9 +292,9 @@ async function salinLaporan() {
 
     teks += `----------------------------\n`;
     teks += `*RINGKASAN OMZET:*\n`;
-    teks += `Tunai: ${jumlahTunai} transaksi sebanyak Rp ${omzetTunai.toLocaleString('id-ID')}\n`;
-    teks += `QRIS: ${jumlahQris} transaksi sebanyak Rp ${omzetQris.toLocaleString('id-ID')}\n`;
-    teks += `DP / Uang Muka: ${jumlahDP} transaksi sebanyak Rp ${omzetDP.toLocaleString('id-ID')}\n\n`;
+    teks += `Tunai: ${jumlahTunai} transaksi\nRp ${omzetTunai.toLocaleString('id-ID')}\n`;
+    teks += `QRIS: ${jumlahQris} transaksi\nRp ${omzetQris.toLocaleString('id-ID')}\n`;
+    teks += `DP / Uang Muka: ${jumlahDP} transaksi\nRp ${omzetDP.toLocaleString('id-ID')}\n\n`;
     teks += `Total Transaksi: ${antrean.length}\n`;
     teks += `*TOTAL OMZET MASUK:* *Rp ${totalOmzetHarian.toLocaleString('id-ID')}*\n`;
     teks += `----------------------------`;
@@ -336,11 +335,13 @@ function tampilkanRiwayat() {
         return `<tr>
             <td>${data.tanggal.split(' ')[1]?.substring(0,5) || '--:--'}</td>
             <td>${data.item}${teksCatatanSamping}</td>
-            <td>Rp ${data.total.toLocaleString('id-ID')}</td>
+            <!-- PENGHAPUSAN RP: Di kolom harga tabel riwayat per transaksi -->
+            <td>${data.total.toLocaleString('id-ID')}</td>
         </tr>`;
     }).join('') : '<tr><td colspan="3" style="text-align:center; padding:15px; color:#999;">Belum ada penjualan.</td></tr>';
     
-    document.getElementById('grand-total-income').innerText = `Rp ${income.toLocaleString('id-ID')}`;
+    // PENGHAPUSAN RP: Di total pendapatan paling bawah tabel
+    document.getElementById('grand-total-income').innerText = income.toLocaleString('id-ID');
 }
 
 function resetCart() { 
